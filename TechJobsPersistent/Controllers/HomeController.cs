@@ -10,6 +10,8 @@ using TechJobsPersistent.ViewModels;
 using TechJobsPersistent.Data;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
+using System.Net;
 
 namespace TechJobsPersistent.Controllers
 {
@@ -17,9 +19,11 @@ namespace TechJobsPersistent.Controllers
     {
         private JobDbContext context;
 
+
         public HomeController(JobDbContext dbContext)
         {
             context = dbContext;
+
         }
 
         public IActionResult Index()
@@ -30,14 +34,65 @@ namespace TechJobsPersistent.Controllers
         }
 
         [HttpGet("/Add")]
-        public IActionResult AddJob()
+        public IActionResult AddJob(AddJobViewModel addJobViewModel)
         {
-            return View();
+
+            addJobViewModel.SelectListItem = context.Employers.ToList();
+            addJobViewModel.PossibleSkills = context.Skills.ToList();
+
+            return View(addJobViewModel);
         }
 
-        public IActionResult ProcessAddJobForm()
+        public IActionResult ProcessAddJobForm(AddJobViewModel addJobViewModel, string[] selectedSkills)
         {
-            return View();
+            if (ModelState.IsValid)
+            {
+                Job job = new Job(addJobViewModel.Name, addJobViewModel.EmployerId);
+                context.Jobs.Add(job);
+
+
+                context.SaveChanges();
+                int i = 0;
+                List<Job> list = context.Jobs.Include(j => j.Employer).ToList();
+
+                List<Job> job1 = context.Jobs.Where(j => j.Name == job.Name).Where(j => j.EmployerId == job.EmployerId).Include(j => j.Employer).ToList();
+
+                foreach (Job j in list)
+                {
+                    if (j == job)
+                    {
+                        i = j.Id;
+                        break;
+                    }
+                }
+
+                foreach (string s in selectedSkills)
+                {
+
+                    JobSkill newSkill = new JobSkill(job.Id, int.Parse(s));
+
+                    context.JobSkills.Add(newSkill);
+
+
+                }
+
+                context.SaveChanges();
+
+                SmtpClient smtpClient = new SmtpClient("smtp.gmail.com")
+                {
+                    Port = 587,
+                    Credentials = new NetworkCredential("techjobspersistent@gmail.com", "LaunchCode75?"),
+                    EnableSsl = true,
+                };
+
+    
+                return Redirect("/Home/");
+            }
+
+            return View("AddJob", addJobViewModel);
+
+
+
         }
 
         public IActionResult Detail(int id)
