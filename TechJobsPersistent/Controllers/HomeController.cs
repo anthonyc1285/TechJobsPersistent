@@ -57,19 +57,19 @@ namespace TechJobsPersistent.Controllers
 
                 List<Job> job1 = context.Jobs.Where(j => j.Name == job.Name).Where(j => j.EmployerId == job.EmployerId).Include(j => j.Employer).ToList();
 
-                foreach (Job j in list)
+                foreach (Job item in list)
                 {
-                    if (j == job)
+                    if (item == job)
                     {
-                        i = j.Id;
+                        i = item.Id;
                         break;
                     }
                 }
 
-                foreach (string s in selectedSkills)
+                foreach (string skill in selectedSkills)
                 {
 
-                    JobSkill newSkill = new JobSkill(job.Id, int.Parse(s));
+                    JobSkill newSkill = new JobSkill(job.Id, int.Parse(skill));
 
                     context.JobSkills.Add(newSkill);
 

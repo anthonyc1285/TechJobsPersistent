@@ -16,6 +16,8 @@ namespace TechJobsPersistent.ViewModels
         [Required(ErrorMessage = "Location cannot be blank")]
 
         public string Location { get; set; }
+        public Employer Employer { get; set; }
+        public List<SelectListItem> Employers { get; set; }
 
         public AddEmployerViewModel()
         {

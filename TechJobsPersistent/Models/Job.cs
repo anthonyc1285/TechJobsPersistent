@@ -22,5 +22,6 @@ namespace TechJobsPersistent.Models
             Name = name;
             EmployerId = employerId;
         }
+
     }
 }
